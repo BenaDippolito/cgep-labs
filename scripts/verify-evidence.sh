@@ -1,3 +1,5 @@
+#Lab 4.4: Added a new script to verify the evidence bundle in the vault (S3 bucket)
+# Step 3: The verify script
 #!/usr/bin/env bash
 # scripts/verify-evidence.sh <run_id>
 set -euo pipefail

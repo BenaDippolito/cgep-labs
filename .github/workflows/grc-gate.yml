@@ -42,7 +42,7 @@ jobs:
         run: |
           curl -fsSL https://github.com/aquasecurity/tfsec/releases/download/v1.28.14/tfsec-linux-amd64 \
             -o /usr/local/bin/tfsec && chmod +x /usr/local/bin/tfsec
-            
+     #Lab 4.4: Install Cosign for signing the evidence bundle       
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
         with:
@@ -96,7 +96,7 @@ jobs:
         run: |
           cp "$TF_WORKING_DIR"/plan.json evidence/lab-4-3/plan.json
           cp "$TF_WORKING_DIR"/plan.txt  evidence/lab-4-3/plan.txt
-
+# Lab 4.4: Added step to bundle, sign, and upload evidence to the vault (S3 bucket)
       - name: Bundle + sign + upload to vault
         id: sign
         if: always()
@@ -135,7 +135,7 @@ jobs:
           aws s3 cp receipt.json "s3://${VAULT}/${KEY_PREFIX}/receipt.json"
           mkdir -p evidence/lab-4-4
           cp receipt.json evidence/lab-4-4/receipt.json
-
+#Lab 4.4: Widen the upload evidence artifacts and added Enforce gate step to ensure the job fails if either conftest or tfsec fail.
       - name: Upload evidence artifact
         if: always()
         uses: actions/upload-artifact@v4

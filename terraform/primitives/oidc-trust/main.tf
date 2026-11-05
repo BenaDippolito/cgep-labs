@@ -38,7 +38,7 @@ resource "aws_iam_role" "grc_gate" {
     }]
   })
 }
-
+#Lab 4.4: Changed IAM policy from read only to limited writing
 resource aws iam put-role-policy \
   --role-name cgep-grc-gate \
   --policy-name vault-write \
