@@ -39,9 +39,18 @@ resource "aws_iam_role" "grc_gate" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "readonly" {
-  role       = aws_iam_role.grc_gate.name
-  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+resource aws iam put-role-policy \
+  --role-name cgep-grc-gate \
+  --policy-name vault-write \
+  --policy-document "$(cat <<EOF
+{
+  "Version":"2012-10-17",
+  "Statement":[{
+    "Effect":"Allow",
+    "Action":["s3:PutObject","s3:GetObject","s3:GetBucketLocation"],
+    "Resource":["arn:aws:s3:::${VAULT}","arn:aws:s3:::${VAULT}/*"]
+  }]
 }
+EOF)"
 
 output "role_arn" { value = aws_iam_role.grc_gate.arn }
