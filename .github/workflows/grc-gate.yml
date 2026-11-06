@@ -22,10 +22,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Resolve AWS role ARN
+        id: aws-role
+        env:
+          AWS_ROLE_ARN_SECRET: ${{ secrets.AWS_ROLE_ARN }}
+          AWS_ROLE_ARN_VAR: ${{ vars.AWS_ROLE_ARN }}
+        run: |
+          ROLE_ARN="${AWS_ROLE_ARN_SECRET:-$AWS_ROLE_ARN_VAR}"
+          ROLE_ARN="${ROLE_ARN//$'\r'/}"
+          ROLE_ARN="${ROLE_ARN//$'\n'/}"
+          if [[ ! "$ROLE_ARN" =~ ^arn:aws(-[a-z]+)?:iam::[0-9]{12}:role/.+ ]]; then
+            echo "::error::Set secrets.AWS_ROLE_ARN or vars.AWS_ROLE_ARN to a valid IAM role ARN."
+            exit 1
+          fi
+          echo "role_arn=$ROLE_ARN" >> "$GITHUB_OUTPUT"
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-to-assume: ${{ steps.aws-role.outputs.role_arn }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform

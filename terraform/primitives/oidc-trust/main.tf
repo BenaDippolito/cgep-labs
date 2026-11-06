@@ -1,4 +1,4 @@
-# Lab 4.3, Step 1: Create the OIDC trust in AWS
+# Lab 4.3, step 1: Create the OIDC trust in AWS
 # terraform/primitives/oidc-trust/main.tf
 terraform {
   required_version = ">= 1.6"
