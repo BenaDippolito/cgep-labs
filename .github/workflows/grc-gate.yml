@@ -39,6 +39,7 @@ jobs:
             | tar -xz -C /usr/local/bin conftest
 
       - name: Install tfsec
+        id: install-tfsec
         run: |
           curl -fsSL https://github.com/aquasecurity/tfsec/releases/download/v1.28.14/tfsec-linux-amd64 \
             -o /usr/local/bin/tfsec && chmod +x /usr/local/bin/tfsec
@@ -79,20 +80,31 @@ jobs:
 
       - name: tfsec scan
         id: tfsec
-        if: always()
+        if: always() && steps.install-tfsec.outcome == 'success'
         run: |
           # Write SARIF for the artifact, then re-run with a severity floor so
           # tfsec's own exit code is the gate (no JSON parsing required).
           # tfsec loads $TF_WORKING_DIR/.tfsec/config.yml on its own (Step 4).
-          # That file excludes aws-s3-encryption-customer-key: SSE-S3 accepted until the KMS lab.
+          # That file excludes aws-s3-encryption-customer-key for the SSE-S3 log bucket.
           tfsec "$TF_WORKING_DIR" --format sarif --out evidence/lab-4-3/tfsec.sarif || true
           tfsec "$TF_WORKING_DIR" --minimum-severity HIGH
 
       - name: Copy plan into evidence
         if: always()
         run: |
-          cp "$TF_WORKING_DIR"/plan.json evidence/lab-4-3/plan.json
-          cp "$TF_WORKING_DIR"/plan.txt  evidence/lab-4-3/plan.txt
+          mkdir -p evidence/lab-4-3
+          if [[ -f "$TF_WORKING_DIR/plan.json" ]]; then
+            cp "$TF_WORKING_DIR/plan.json" evidence/lab-4-3/plan.json
+          else
+            echo "Terraform JSON plan is unavailable; recording the missing output."
+            printf '%s\n' "Terraform JSON plan unavailable." > evidence/lab-4-3/plan-json-unavailable.txt
+          fi
+          if [[ -f "$TF_WORKING_DIR/plan.txt" ]]; then
+            cp "$TF_WORKING_DIR/plan.txt" evidence/lab-4-3/plan.txt
+          else
+            echo "Terraform text plan is unavailable; recording the missing output."
+            printf '%s\n' "Terraform text plan unavailable." > evidence/lab-4-3/plan-txt-unavailable.txt
+          fi
 
       - name: Upload evidence artifact
         if: always()
