@@ -1,4 +1,4 @@
 # terraform/primitives/compliant-s3/.tfsec/config.yml
-# SSE-S3 accepted until the KMS lab.
+# The access-log bucket remains SSE-S3; the primary bucket uses customer-managed KMS.
 exclude:
   - aws-s3-encryption-customer-key

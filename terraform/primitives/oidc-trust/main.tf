@@ -8,7 +8,7 @@ terraform {
 
 provider "aws" { region = "us-east-1" }
 
-variable "github_org"  { type = string }
+variable "github_org" { type = string }
 variable "github_repo" { type = string }
 
 resource "aws_iam_openid_connect_provider" "github" {
@@ -28,7 +28,14 @@ resource "aws_iam_role" "grc_gate" {
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" }
-        StringLike   = { "token.actions.githubusercontent.com:sub" = "repo:${var.github_org}/${var.github_repo}:*" }
+        StringLike = {
+          "token.actions.githubusercontent.com:sub" = [
+            "repo:${var.github_org}@*/${var.github_repo}@*:pull_request",
+            "repo:${var.github_org}/${var.github_repo}:pull_request",
+            "repo:${var.github_org}@*/${var.github_repo}@*:ref:refs/heads/*",
+            "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/*"
+          ]
+        }
       }
     }]
   })
