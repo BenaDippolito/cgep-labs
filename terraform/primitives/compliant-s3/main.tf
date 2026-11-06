@@ -37,6 +37,11 @@ resource "aws_s3_bucket" "primary" {
   bucket = local.primary_name
 }
 
+resource "aws_kms_key" "bucket" {
+  description         = "CMK for ${local.primary_name} S3 bucket encryption"
+  enable_key_rotation = true
+}
+
 #Step 3: Add encryption, versioning, and the public access block
 # terraform/primitives/compliant-s3/main.tf (continued)
 
@@ -47,18 +52,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "primary" {
   bucket = aws_s3_bucket.primary.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.bucket.arn
     }
+    bucket_key_enabled = true
   }
-
-  # KMS teaser:
-  # rule {
-  #   apply_server_side_encryption_by_default {
-  #     sse_algorithm     = "aws:kms"
-  #     kms_master_key_id = aws_kms_key.bucket.arn
-  #   }
-  #   bucket_key_enabled = true
-  # }
 }
 
 # CM-6: Versioning preserves prior object states for recovery and audit.
