@@ -9,5 +9,6 @@ terraform {
 provider "google" {
   project = var.gcp_project
   region  = "us-central1"
+  user_project_override = true
+  billing_project = var.gcp_project
 }
-

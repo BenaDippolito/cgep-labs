@@ -9,7 +9,7 @@ resource "google_org_policy_policy" "uniform_bucket_access" {
   }
 }
 
-resource "google_org_policy_policy" "disable_sa_keys" {
+ resource "google_org_policy_policy" "disable_sa_keys" {
   name   = "projects/${var.gcp_project}/policies/iam.disableServiceAccountKeyCreation"
   parent = "projects/${var.gcp_project}"
 
